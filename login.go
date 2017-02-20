@@ -1,4 +1,4 @@
-// Use the TLS OV Chipkaart API to get transactions done using the OV chipkaart.
+//Package ovchipapi Use the TLS OV Chipkaart API to get transactions done using the OV chipkaart.
 package ovchipapi
 
 import (
@@ -9,19 +9,19 @@ import (
 )
 
 type loginResponse struct {
-	Scope string `json:"scope"`
-	TokenType string `json:"token_type"`
-	ExpiresIn int `json:"expires_in"`
+	Scope        string `json:"scope"`
+	TokenType    string `json:"token_type"`
+	ExpiresIn    int    `json:"expires_in"`
 	RefreshToken string `json:"refresh_token"`
-	IDToken string `json:"id_token"`
-	AccessToken string `json:"access_token"`
+	IDToken      string `json:"id_token"`
+	AccessToken  string `json:"access_token"`
 }
 
 // Login a user using the username and password. An authorization token will be returned.
 func Login(username, password string) (string, error) {
-	resp, err := postAndBody(loginUrl, url.Values{
+	resp, err := postAndBody(loginURL, url.Values{
 		"scope":         {"openid"},
-		"client_id":     {clientId},
+		"client_id":     {clientID},
 		"client_secret": {clientSecret},
 		"grant_type":    {"password"},
 		"username":      {username},
@@ -48,7 +48,7 @@ func Login(username, password string) (string, error) {
 func authorize(idToken string) (string, error) {
 	var authorizationToken string
 
-	err := postAndResponse(authorizeUrl, url.Values{
+	err := postAndResponse(authorizeURL, url.Values{
 		"authenticationToken": {idToken},
 	}, &authorizationToken)
 

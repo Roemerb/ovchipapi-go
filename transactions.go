@@ -6,32 +6,34 @@ import (
 	"strconv"
 )
 
+// OVTransaction represents a OV Chipkaart transaction and is used to unmarshal
+// the reponse from the OV Chipkaart API to a struct
 type OVTransaction struct {
-	CheckInInfo            string `json:"checkInInfo"`
-	CheckInText            string `json:"checkInText"`
+	CheckInInfo            string  `json:"checkInInfo"`
+	CheckInText            string  `json:"checkInText"`
 	Fare                   float64 `json:"fare"`
-	FareCalculation        string `json:"fareCalculation"`
-	FareText               string `json:"fareText"`
-	ModalType              string `json:"modalType"`
-	ProductInfo            string `json:"productInfo"`
-	ProductText            string `json:"productText"`
-	Carrier                string `json:"pto"`
-	TransactionDateTime    OVTime `json:"transactionDateTime"`
-	TransactionInfo        string `json:"transactionInfo"`
-	TransactionName        string `json:"transactionName"`
+	FareCalculation        string  `json:"fareCalculation"`
+	FareText               string  `json:"fareText"`
+	ModalType              string  `json:"modalType"`
+	ProductInfo            string  `json:"productInfo"`
+	ProductText            string  `json:"productText"`
+	Carrier                string  `json:"pto"`
+	TransactionDateTime    OVTime  `json:"transactionDateTime"`
+	TransactionInfo        string  `json:"transactionInfo"`
+	TransactionName        string  `json:"transactionName"`
 	EPurseMut              float64 `json:"ePurseMut"`
-	EPurseMutInfo          string `json:"ePurseMutInfo"`
-	TransactionExplanation string `json:"transactionExplanation"`
-	TransactionPriority    string `json:"transactionPriority"`
+	EPurseMutInfo          string  `json:"ePurseMutInfo"`
+	TransactionExplanation string  `json:"transactionExplanation"`
+	TransactionPriority    string  `json:"transactionPriority"`
 }
 
 type transactionsResponse struct {
-	TotalSize int `json:"totalSize"`
-	Records   []*OVTransaction `json:"records"`
+	TotalSize          int              `json:"totalSize"`
+	Records            []*OVTransaction `json:"records"`
 	NextRequestContext struct {
 		StartDate string `json:"startDate"`
 		EndDate   string `json:"endDate"`
-		Offset    int `json:"offset"`
+		Offset    int    `json:"offset"`
 	} `json:"nextRequestContext"`
 }
 
@@ -41,10 +43,10 @@ type resultError struct {
 	Error       error
 }
 
-// Get all transactions from startDate to endDate. This will potentially fire off a lot of requests.
-// It will retrieve all transactions in requests of 20/request because this is a limit in the API.
-func Transactions(authorizationToken string, locale Locale, mediumId string, startDate string, endDate string) ([]*OVTransaction, error) {
-	firstSlice, err := transactionsSlice(authorizationToken, locale, mediumId, 0, startDate, endDate)
+// Transactions will fetch OV Chipkaart transactions from the API. It uses startDate and endDate to
+// limit the results to a period.
+func Transactions(authorizationToken string, locale Locale, mediumID string, startDate string, endDate string) ([]*OVTransaction, error) {
+	firstSlice, err := transactionsSlice(authorizationToken, locale, mediumID, 0, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
@@ -56,7 +58,7 @@ func Transactions(authorizationToken string, locale Locale, mediumId string, sta
 	offset := 20
 
 	for offset < firstSlice.TotalSize {
-		slice, err := transactionsSlice(authorizationToken, locale, mediumId, offset, startDate, endDate)
+		slice, err := transactionsSlice(authorizationToken, locale, mediumID, offset, startDate, endDate)
 		if err != nil {
 			return nil, err
 		}
@@ -68,11 +70,11 @@ func Transactions(authorizationToken string, locale Locale, mediumId string, sta
 	return transactions, nil
 }
 
-// Get all transactions from startDate to endDate. This will potentially fire off a lot of requests.
+// TransactionsAsync will get all transactions from startDate to endDate. This will potentially fire off a lot of requests.
 // It will retrieve all transactions in requests of 20/request because this is a limit in the API.
 // This method will execute all requests in parallel and is a lot faster compared to Transactions.
-func TransactionsAsync(authorizationToken string, locale Locale, mediumId string, startDate string, endDate string) ([]*OVTransaction, error) {
-	firstSlice, err := transactionsSlice(authorizationToken, locale, mediumId, 0, startDate, endDate)
+func TransactionsAsync(authorizationToken string, locale Locale, mediumID string, startDate string, endDate string) ([]*OVTransaction, error) {
+	firstSlice, err := transactionsSlice(authorizationToken, locale, mediumID, 0, startDate, endDate)
 	if err != nil {
 		return nil, err
 	}
@@ -89,7 +91,7 @@ func TransactionsAsync(authorizationToken string, locale Locale, mediumId string
 		batchOffset := i * 20
 
 		go func() {
-			slice, err := transactionsSlice(authorizationToken, locale, mediumId, batchOffset, startDate, endDate)
+			slice, err := transactionsSlice(authorizationToken, locale, mediumID, batchOffset, startDate, endDate)
 			if err != nil {
 				results <- resultError{nil, batchOffset, err}
 				return
@@ -125,13 +127,13 @@ func TransactionsAsync(authorizationToken string, locale Locale, mediumId string
 	return transactions, nil
 }
 
-func transactionsSlice(authorizationToken string, locale Locale, mediumId string, offset int, startDate string, endDate string) (*transactionsResponse, error) {
+func transactionsSlice(authorizationToken string, locale Locale, mediumID string, offset int, startDate string, endDate string) (*transactionsResponse, error) {
 	object := &transactionsResponse{}
 
-	err := postAndResponse(transactionsUrl, url.Values{
+	err := postAndResponse(transactionsURL, url.Values{
 		"authorizationToken": {authorizationToken},
 		"locale":             {string(locale)},
-		"mediumId":           {mediumId},
+		"mediumId":           {mediumID},
 		"offset":             {strconv.Itoa(offset)},
 		"startDate":          {startDate},
 		"endDate":            {endDate},

@@ -4,24 +4,26 @@ import (
 	"net/url"
 )
 
+// OVCard represents an OV Chipkaart response. It describes a physical card.
+// This struct is used to unmarshal the response from the API
 type OVCard struct {
 	Alias              string `json:"alias"`
 	MediumID           string `json:"mediumId"`
-	Balance            int `json:"balance"`
+	Balance            int    `json:"balance"`
 	BalanceDate        OVTime `json:"balanceDate"`
-	DefaultCard        bool `json:"defaultCard"`
+	DefaultCard        bool   `json:"defaultCard"`
 	Status             string `json:"status"`
 	ExpiryDate         OVTime `json:"expiryDate"`
-	AutoReloadEnabled  bool `json:"autoReloadEnabled"`
+	AutoReloadEnabled  bool   `json:"autoReloadEnabled"`
 	Type               string `json:"type"`
 	StatusAnnouncement string `json:"statusAnnouncement"`
 }
 
-// Get all OV chipkaarten registered to the account
+// Cards gets all OV chipkaarten registered to the account
 func Cards(authorizationToken string, locale Locale) ([]*OVCard, error) {
 	cards := make([]*OVCard, 0)
 
-	err := postAndResponse(cardsUrl, url.Values{
+	err := postAndResponse(cardsURL, url.Values{
 		"authorizationToken": {authorizationToken},
 		"locale":             {string(locale)},
 	}, &cards)
@@ -29,19 +31,21 @@ func Cards(authorizationToken string, locale Locale) ([]*OVCard, error) {
 	return cards, err
 }
 
+// OVCardDetail represents a more detailed description of a physical OV Card.
+// It is used to unmarshal the response JSON from the API
 type OVCardDetail struct {
 	Card struct {
 		Alias                     string `json:"alias"`
-		Balance                   int `json:"balance"`
+		Balance                   int    `json:"balance"`
 		BalanceDate               OVTime `json:"balanceDate"`
 		MediumID                  string `json:"mediumId"`
 		ExpiryDate                OVTime `json:"expiryDate"`
-		DefaultCard               bool `json:"defaultCard"`
-		AutoReloadEnabled         bool `json:"autoReloadEnabled"`
+		DefaultCard               bool   `json:"defaultCard"`
+		AutoReloadEnabled         bool   `json:"autoReloadEnabled"`
 		AutoReloadAccountNumber   string `json:"autoReloadAccountNumber"`
-		AutoReloadAmount          int `json:"autoReloadAmount"`
+		AutoReloadAmount          int    `json:"autoReloadAmount"`
 		AutoReloadPaymentMandate  string `json:"autoReloadPaymentMandate"`
-		AutoReloadThresholdAmount int `json:"autoReloadThresholdAmount"`
+		AutoReloadThresholdAmount int    `json:"autoReloadThresholdAmount"`
 		Status                    string `json:"status"`
 		StatusAnnouncement        string `json:"statusAnnouncement"`
 		Type                      string `json:"type"`
@@ -57,14 +61,14 @@ type OVCardDetail struct {
 	} `json:"productInfoList"`
 }
 
-// Get a single OV Chipkaart
-func Card(authorizationToken string, locale Locale, mediumId string) (*OVCardDetail, error) {
+// Card fetches a single OV Chipkaart
+func Card(authorizationToken string, locale Locale, mediumID string) (*OVCardDetail, error) {
 	card := &OVCardDetail{}
 
-	err := postAndResponse(cardUrl, url.Values{
+	err := postAndResponse(cardURL, url.Values{
 		"authorizationToken": {authorizationToken},
 		"locale":             {string(locale)},
-		"mediumId":           {mediumId},
+		"mediumId":           {mediumID},
 	}, &card)
 
 	return card, err
