@@ -21,7 +21,7 @@ func postAndBody(url string, values url.Values) ([]byte, error) {
 }
 
 // POST the values to the URL and return the JSON decoded value
-func postAndJson(url string, values url.Values) (map[string]*json.RawMessage, error) {
+func postAndJSON(url string, values url.Values) (map[string]*json.RawMessage, error) {
 	body, err := postAndBody(url, values)
 	if err != nil {
 		return nil, err
@@ -38,7 +38,7 @@ func postAndJson(url string, values url.Values) (map[string]*json.RawMessage, er
 
 // POST the values to the URL and return the "o" key deserialized into v
 func postAndResponse(url string, values url.Values, v interface{}) error {
-	resp, err := postAndJson(url, values)
+	resp, err := postAndJSON(url, values)
 	if err != nil {
 		return err
 	}

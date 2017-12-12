@@ -6,12 +6,15 @@ import (
 	"time"
 )
 
+// OVTime is a wrapper of time.Time
 type OVTime time.Time
 
+// MarshalJSON will marshal an OVTime (time.Time) to JSON
 func (t OVTime) MarshalJSON() ([]byte, error) {
 	return []byte(string(time.Time(t).Unix() * 1000)), nil
 }
 
+// UnmarshalJSON will unmarshal JSON to a OVTime (time.Time)
 func (t *OVTime) UnmarshalJSON(b []byte) error {
 	var millis int64
 	if err := json.Unmarshal(b, &millis); err != nil {
